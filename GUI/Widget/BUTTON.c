@@ -167,8 +167,8 @@ static void _Paint(BUTTON_Obj* pObj, BUTTON_Handle hObj) {
   }
   /* Draw focus */
   if (State & BUTTON_STATE_FOCUS) {
-    LCD_SetColor(GUI_RED);    //LCD_SetColor(GUI_BLACK);Áõ¾©Íþ20110412
-    GUI_DrawFocusRect(&rClient, 2);
+    LCD_SetColor(GUI_BLACK);
+    GUI_DrawFocusRect(&rClient, -1);
   }
   WM_SetUserClipRect(NULL);
 }
