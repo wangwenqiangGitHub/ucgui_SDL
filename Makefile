@@ -2,15 +2,20 @@ TARGET  = libucgui
 SRC_C   = $(shell find . -name "*.c")
 OBJ_C   = $(patsubst %.c, %.o, $(SRC_C))
 SRCS    = $(SRC_C) $(SRC_C)
-OBJS    = $(OBJ_C) 
-CFLAGS  = -I./GUI_X -I./GUI/Core -I./GUI/WM -I./GUI/Widget -I/usr/include/SDL
+OBJS    = $(OBJ_C)
+CFLAGS += -DUSE_SDL
+CFLAGS += -I./GUI_X
+CFLAGS += -I./GUI/WM
+CFLAGS += -I./GUI/Core
+CFLAGS += -I./GUI/Widget
+CFLAGS += -I/usr/include/SDL
 LDFLAGS = -lSDL
 
 .PHONY: all
 all: $(TARGET).a
 
 $(TARGET).a : $(OBJS)
-	ar crv $(TARGET).a $(OBJS) 
+	ar crv $(TARGET).a $(OBJS)
 
 %.o : %.c
 	$(CC) -c $(CFLAGS) $< -o  $@
