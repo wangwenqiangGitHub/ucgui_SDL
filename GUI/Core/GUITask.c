@@ -123,7 +123,6 @@ void GUI_Unlock(void) {
   }
   /* Test if _EntranceCnt is in reasonable range ... Not required in release builds */
   GUI_DEBUG_ERROROUT_IF((_EntranceCnt < 0), "GUITASK.c: GUI_Unlock() _EntranceCnt underflow ");
-  fb_flip();
 }
 
 /*********************************************************************

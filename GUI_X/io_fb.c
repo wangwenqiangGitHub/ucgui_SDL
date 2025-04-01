@@ -12,7 +12,9 @@
 #include <sys/mman.h>
 #include <linux/fb.h>
 
-#if defined(USE_SDL)
+#include "GUIConf.h"
+
+#if GUI_SDLSUPPORT
 #include <SDL.h>
 
 static SDL_Surface *screen = NULL;
@@ -20,7 +22,7 @@ static SDL_Surface *screen = NULL;
 
 int fb_getkey(void)
 {
-#if defined(USE_SDL)
+#if GUI_SDLSUPPORT
     SDL_Event event = { 0 };
 
     if (SDL_PollEvent(&event)) {
@@ -35,9 +37,9 @@ int fb_getkey(void)
 
 int fb_init(void)
 {
-#if defined(USE_SDL)
+#if GUI_SDLSUPPORT
     SDL_Init(SDL_INIT_VIDEO);
-    screen = SDL_SetVideoMode(320, 240, 16, SDL_HWSURFACE);
+    screen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
 #endif
 
     return 0;
@@ -45,14 +47,14 @@ int fb_init(void)
 
 void fb_deinit(void)
 {
-#if defined(USE_SDL)
+#if GUI_SDLSUPPORT
     SDL_Quit();
 #endif
 }
 
 void fb_flip(void)
 {
-#if defined(USE_SDL)
+#if GUI_SDLSUPPORT
     SDL_Flip(screen);
 #endif
 }
@@ -63,7 +65,7 @@ int fb_setpixel(int width, int height, int x, int y, unsigned short color)
         return -1;
     }
 
-#if defined(USE_SDL)
+#if GUI_SDLSUPPORT
     unsigned short *dst = ((unsigned short *)screen->pixels + y * width + x);
     *dst = color;
 #endif
@@ -77,7 +79,7 @@ unsigned short fb_readpixel(int width, int height, int x, int y)
         return -1;
     }
 
-#if defined(USE_SDL)
+#if GUI_SDLSUPPORT
     unsigned short *dst = ((unsigned short *)screen->pixels + y * width + x);
     return *dst;
 #endif

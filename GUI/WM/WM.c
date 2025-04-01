@@ -23,6 +23,10 @@ Purpose     : Windows manager core
 #define WM_C
 #include "WM_Intern_ConfDep.h"
 
+#if GUI_SDLSUPPORT
+void fb_flip(void);
+#endif
+
 #if GUI_WINSUPPORT    /* If 0, WM will not generate any code */
 
 /*********************************************************************
@@ -1591,9 +1595,19 @@ int WM_Exec1(void) {
 */
 int WM_Exec(void) {
   int r = 0;
+  static int redraw = 0;
+
   while (WM_Exec1()) {
     r = 1;                  /* We have done something */
+    redraw = 3;
   }
+
+  #if GUI_SDLSUPPORT
+  if (redraw) {
+    redraw -= 1;
+    fb_flip();
+  }
+  #endif
   return r;
 }
 

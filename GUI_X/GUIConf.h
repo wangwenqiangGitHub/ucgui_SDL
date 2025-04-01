@@ -33,6 +33,10 @@ Purpose     : Configures abilities, fonts etc.
 *         Configuration of available packages
 */
 
+#if defined(USE_SDL)
+#define GUI_SDLSUPPORT            1  /* SDL 1.2 available */
+#endif
+
 #define GUI_WINSUPPORT            1  /* Window manager package available */
 #define GUI_SUPPORT_MEMDEV        1  /* Memory devices available */
 #define GUI_SUPPORT_AA            1  /* Anti aliasing available */
