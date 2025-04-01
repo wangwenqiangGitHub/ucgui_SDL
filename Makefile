@@ -9,7 +9,7 @@ CFLAGS += -I./GUI_X
 CFLAGS += -I./GUI/WM
 CFLAGS += -I./GUI/Core
 CFLAGS += -I./GUI/Widget
-CFLAGS += -I/usr/local/include/SDL
+CFLAGS += -I/usr/include/SDL
 LDFLAGS = -lSDL
 
 .PHONY: all

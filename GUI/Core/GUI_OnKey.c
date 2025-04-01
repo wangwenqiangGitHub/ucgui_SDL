@@ -110,16 +110,6 @@ void GUI_StoreKeyMsg(int Key, int PressedCnt) {
 int GUI_PollKeyMsg(void) {
   int r = 0;
   GUI_LOCK();
-
-#if defined(USE_SDL)
-  r = fb_getkey();
-  if (r) {
-    _KeyMsgCnt = 1;
-    _KeyMsg.Key = r;
-    _KeyMsg.PressedCnt = 1;
-  }
-#endif
-
   if (_KeyMsgCnt) {
     int Key;
     _KeyMsgCnt--;

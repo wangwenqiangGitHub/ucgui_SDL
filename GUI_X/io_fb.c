@@ -13,33 +13,56 @@
 #include <linux/fb.h>
 
 #include "GUIConf.h"
+#include "GUI_Protected.h"
 
 #if GUI_SDLSUPPORT
 #include <SDL.h>
 
+static int running = 0;
+static pthread_t thread_id = 0;
 static SDL_Surface *screen = NULL;
 #endif
 
-int fb_getkey(void)
-{
 #if GUI_SDLSUPPORT
+static void* input_handler(void *param)
+{
     SDL_Event event = { 0 };
+    GUI_PID_STATE st = { 0 };
 
-    if (SDL_PollEvent(&event)) {
-        if (event.type == SDL_KEYDOWN) {
-            return event.key.keysym.sym;
+    running = 1;
+    while (running) {
+        if (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_KEYDOWN:
+                GUI_StoreKeyMsg(event.key.keysym.sym, 1);
+                break;
+            case SDL_MOUSEMOTION:
+                SDL_GetMouseState(&st.x, &st.y);
+                GUI_MOUSE_StoreState(&st);
+                break;
+            case SDL_MOUSEBUTTONUP:
+                st.Pressed = 0;
+                GUI_MOUSE_StoreState(&st);
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                st.Pressed = 1;
+                GUI_MOUSE_StoreState(&st);
+                break;
+            }
         }
+        usleep(1000000 / 30);
     }
-#endif
 
-    return 0;
+    return NULL;
 }
+#endif
 
 int fb_init(void)
 {
 #if GUI_SDLSUPPORT
     SDL_Init(SDL_INIT_VIDEO);
     screen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
+    pthread_create(&thread_id, NULL, input_handler, NULL);
 #endif
 
     return 0;
@@ -48,6 +71,8 @@ int fb_init(void)
 void fb_deinit(void)
 {
 #if GUI_SDLSUPPORT
+    running = 0;
+    pthread_join(thread_id, NULL);
     SDL_Quit();
 #endif
 }
