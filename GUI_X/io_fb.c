@@ -3,12 +3,13 @@
 #include <string.h>
 #include <memory.h>
 #include <fcntl.h>
-#include <sys/stat.h>
+#include <errno.h>
 #include <unistd.h>
+#include <pthread.h>
+#include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <errno.h>
 #include <sys/mman.h>
 #include <linux/fb.h>
 
