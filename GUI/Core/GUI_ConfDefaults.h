@@ -57,7 +57,7 @@ Attention : Do not modify this file ! If you do, you will not
 #endif
 
 #ifndef GUI_SUPPORT_TOUCH
-  #define GUI_SUPPORT_TOUCH   0
+  #define GUI_SUPPORT_TOUCH   1
 #endif
 
 #ifndef GUI_SUPPORT_MOUSE
@@ -65,7 +65,7 @@ Attention : Do not modify this file ! If you do, you will not
 #endif
 
 #ifndef GUI_SUPPORT_MEMDEV
-  #define GUI_SUPPORT_MEMDEV  0
+  #define GUI_SUPPORT_MEMDEV  1
 #endif
 
 #ifndef GUI_SUPPORT_AA

@@ -42,12 +42,18 @@ static void* input_handler(void *param)
                 GUI_MOUSE_StoreState(&st);
                 break;
             case SDL_MOUSEBUTTONUP:
+                SDL_GetMouseState(&st.x, &st.y);
                 st.Pressed = 0;
                 GUI_MOUSE_StoreState(&st);
+
+                GUI_TOUCH_StoreState(st.x, st.y);
                 break;
             case SDL_MOUSEBUTTONDOWN:
+                SDL_GetMouseState(&st.x, &st.y);
                 st.Pressed = 1;
                 GUI_MOUSE_StoreState(&st);
+
+                GUI_TOUCH_StoreState(st.x, st.y);
                 break;
             }
         }
