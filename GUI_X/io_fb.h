@@ -6,3 +6,4 @@ int            fb_setpixel(int width, int height, int x, int y, unsigned short c
 unsigned short fb_readpixel(int width, int height, int x, int y);
 void           fb_flip(void);
 int            fb_getkey(void);
+void*          fb_getbuffer(void);

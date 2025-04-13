@@ -64,6 +64,11 @@ static void* input_handler(void *param)
 }
 #endif
 
+void* fb_getbuffer(void)
+{
+    return NULL;
+}
+
 int fb_init(void)
 {
 #if GUI_SDLSUPPORT
