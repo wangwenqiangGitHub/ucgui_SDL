@@ -24,21 +24,9 @@ Purpose     : Sample configuration file
 
 #define LCD_BITSPERPIXEL  (16)
 
-#if defined(UIDBG)
+#if defined(UT) || defined(UIDBG) || defined(MIYOO_MINI) || defined(MIYOO_A30) || defined(MIYOO_FLIP) || defined(XT897)
 #define LCD_XSIZE         (640)   /* X-resolution of LCD, Logical coor. */
 #define LCD_YSIZE         (480)   /* Y-resolution of LCD, Logical coor. */
-#elif defined(MIYOO_MINI)
-#define LCD_XSIZE         (640)   /* X-resolution of LCD, Logical coor. */
-#define LCD_YSIZE         (480)   /* Y-resolution of LCD, Logical coor. */
-#elif defined(MIYOO_A30)
-#define LCD_XSIZE         (640)   /* X-resolution of LCD, Logical coor. */
-#define LCD_YSIZE         (480)   /* Y-resolution of LCD, Logical coor. */
-#elif defined(MIYOO_FLIP)
-#define LCD_XSIZE         (640)   /* X-resolution of LCD, Logical coor. */
-#define LCD_YSIZE         (480)   /* Y-resolution of LCD, Logical coor. */
-#elif defined(MIYOO_XT897)
-#define LCD_XSIZE         (960)   /* X-resolution of LCD, Logical coor. */
-#define LCD_YSIZE         (540)   /* Y-resolution of LCD, Logical coor. */
 #else
 #define LCD_XSIZE         (320)   /* X-resolution of LCD, Logical coor. */
 #define LCD_YSIZE         (240)   /* Y-resolution of LCD, Logical coor. */

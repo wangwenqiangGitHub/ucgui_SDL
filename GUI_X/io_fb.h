@@ -1,6 +1,6 @@
 #include <sys/types.h>
 
-#if defined(UIDBG)
+#if defined(UT) || defined(UIDBG) || defined(MIYOO_MINI) || defined(MIYOO_A30) || defined(MIYOO_FLIP) || defined(XT897)
 #define SCREEN_W 640
 #define SCREEN_H 480
 #endif
