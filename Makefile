@@ -7,6 +7,7 @@ CFLAGS += -I./GUI_X
 CFLAGS += -I./GUI/WM
 CFLAGS += -I./GUI/Core
 CFLAGS += -I./GUI/Widget
+CFLAGS += $(MOREFLAGS)
 
 ifeq ($(MOD),)
     CFLAGS += -O2

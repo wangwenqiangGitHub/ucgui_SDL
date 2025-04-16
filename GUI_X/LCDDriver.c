@@ -357,7 +357,7 @@ void LCD_L0_SetPixelIndex(int x, int y, int PixelIndex) {
   /* Write into hardware ... Adapt to your system */
   {
     /* ... */
-    fb_setpixel(320, 240, xPhys, yPhys, PixelIndex);
+    fb_setpixel(LCD_XSIZE, LCD_YSIZE, xPhys, yPhys, PixelIndex);
   }
 }
 
@@ -385,7 +385,7 @@ unsigned int LCD_L0_GetPixelIndex(int x, int y) {
   /* Read from hardware ... Adapt to your system */
   {
     PixelIndex = 0;/* ... */
-    PixelIndex = fb_readpixel(320, 240, xPhys, yPhys);
+    PixelIndex = fb_readpixel(LCD_XSIZE, LCD_YSIZE, xPhys, yPhys);
   }
   return PixelIndex;
 }

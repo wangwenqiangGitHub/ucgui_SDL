@@ -13,6 +13,7 @@
 #include <sys/mman.h>
 #include <linux/fb.h>
 
+#include "io_fb.h"
 #include "GUIConf.h"
 #include "GUI_Protected.h"
 
@@ -22,6 +23,8 @@
 static int running = 0;
 static pthread_t thread_id = 0;
 static SDL_Surface *screen = NULL;
+#else
+static unsigned short *pixels = NULL;
 #endif
 
 #if GUI_SDLSUPPORT
@@ -66,7 +69,11 @@ static void* input_handler(void *param)
 
 void* fb_getbuffer(void)
 {
-    return NULL;
+#if GUI_SDLSUPPORT
+    return screen->pixels;
+#endif
+
+    return pixels;
 }
 
 int fb_init(void)
@@ -75,6 +82,8 @@ int fb_init(void)
     SDL_Init(SDL_INIT_VIDEO);
     screen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
     pthread_create(&thread_id, NULL, input_handler, NULL);
+#else
+    pixels = malloc(SCREEN_W * SCREEN_H * 2);
 #endif
 
     return 0;
@@ -86,6 +95,11 @@ void fb_deinit(void)
     running = 0;
     pthread_join(thread_id, NULL);
     SDL_Quit();
+#else
+    if (pixels) {
+        free(pixels);
+        pixels = NULL;
+    }
 #endif
 }
 
@@ -105,6 +119,9 @@ int fb_setpixel(int width, int height, int x, int y, unsigned short color)
 #if GUI_SDLSUPPORT
     unsigned short *dst = ((unsigned short *)screen->pixels + y * width + x);
     *dst = color;
+#else
+    unsigned short *dst = ((unsigned short *)pixels + y * width + x);
+    *dst = color;
 #endif
 
     return 0;
@@ -118,6 +135,9 @@ unsigned short fb_readpixel(int width, int height, int x, int y)
 
 #if GUI_SDLSUPPORT
     unsigned short *dst = ((unsigned short *)screen->pixels + y * width + x);
+    return *dst;
+#else
+    unsigned short *dst = ((unsigned short *)pixels + y * width + x);
     return *dst;
 #endif
 
