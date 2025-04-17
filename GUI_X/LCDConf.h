@@ -20,20 +20,19 @@ Purpose     : Sample configuration file
 #ifndef LCDCONF_H
 #define LCDCONF_H
 
-#define LCD_CONTROLLER    43480472    //4.3 480x272
-
-#define LCD_BITSPERPIXEL  (16)
+#define LCD_CONTROLLER      43480472    //4.3 480x272
+#define LCD_BITSPERPIXEL    (16)
 
 #if defined(UT) || defined(UIDBG) || defined(MIYOO_MINI) || defined(MIYOO_A30) || defined(MIYOO_FLIP) || defined(XT897)
-#define LCD_XSIZE         (640)   /* X-resolution of LCD, Logical coor. */
-#define LCD_YSIZE         (480)   /* Y-resolution of LCD, Logical coor. */
+#define LCD_XSIZE           (640)   /* X-resolution of LCD, Logical coor. */
+#define LCD_YSIZE           (480)   /* Y-resolution of LCD, Logical coor. */
 #else
-#define LCD_XSIZE         (320)   /* X-resolution of LCD, Logical coor. */
-#define LCD_YSIZE         (240)   /* Y-resolution of LCD, Logical coor. */
+#define LCD_XSIZE           (320)   /* X-resolution of LCD, Logical coor. */
+#define LCD_YSIZE           (240)   /* Y-resolution of LCD, Logical coor. */
 #endif
 
-#define LCD_SWAP_XY    (0)
-#define LCD_SWAP_RB    (1)
+#define LCD_SWAP_XY         (0)
+#define LCD_SWAP_RB         (1)
 
 
 #endif /* LCDCONF_H */

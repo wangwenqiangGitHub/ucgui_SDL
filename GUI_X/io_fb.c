@@ -14,6 +14,7 @@
 #include <linux/fb.h>
 
 #include "io_fb.h"
+#include "LCDConf.h"
 #include "GUIConf.h"
 #include "GUI_Protected.h"
 
@@ -80,10 +81,10 @@ int fb_init(void)
 {
 #if GUI_SDLSUPPORT
     SDL_Init(SDL_INIT_VIDEO);
-    screen = SDL_SetVideoMode(320, 240, 16, SDL_SWSURFACE);
+    screen = SDL_SetVideoMode(LCD_XSIZE, LCD_YSIZE, 16, SDL_SWSURFACE);
     pthread_create(&thread_id, NULL, input_handler, NULL);
 #else
-    pixels = malloc(SCREEN_W * SCREEN_H * 2);
+    pixels = malloc(LCD_XSIZE * LCD_YSIZE * 2);
 #endif
 
     return 0;
