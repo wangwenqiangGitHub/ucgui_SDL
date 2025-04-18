@@ -72,9 +72,9 @@ void* fb_getbuffer(void)
 {
 #if GUI_SDLSUPPORT
     return screen->pixels;
-#endif
-
+#else
     return pixels;
+#endif
 }
 
 int fb_init(void)
