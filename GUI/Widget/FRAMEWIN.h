@@ -44,7 +44,8 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #define FRAMEWIN_CF_MINIMIZED  (1<<6)
 #define FRAMEWIN_CF_MAXIMIZED  (1<<7)
 #define FRAMEWIN_CF_ICON16     (1<<8)
-#define FRAMEWIN_CF_ICON32     (1<<9)
+#define FRAMEWIN_CF_ICON24     (1<<9)
+#define FRAMEWIN_CF_ICON32     (1<<10)
 
 #define FRAMEWIN_SF_ACTIVE     FRAMEWIN_CF_ACTIVE
 #define FRAMEWIN_SF_MOVEABLE   FRAMEWIN_CF_MOVEABLE
@@ -52,6 +53,7 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #define FRAMEWIN_SF_MINIMIZED  FRAMEWIN_CF_MINIMIZED
 #define FRAMEWIN_SF_MAXIMIZED  FRAMEWIN_CF_MAXIMIZED
 #define FRAMEWIN_SF_ICON16     FRAMEWIN_CF_ICON16
+#define FRAMEWIN_SF_ICON24     FRAMEWIN_CF_ICON24
 #define FRAMEWIN_SF_ICON32     FRAMEWIN_CF_ICON32
 
 /************************************************************
