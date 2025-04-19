@@ -468,15 +468,31 @@ static void _Paint(FRAMEWIN_Obj* pObj) {
     if (pObj->Props.BorderSize >= 2) {
       WIDGET_EFFECT_3D_DrawUp();  /* pObj->Widget.pEffect->pfDrawUp(); */
     }
-    if (pObj->Flags & FRAMEWIN_SF_ICON16) {
+    if ((pObj->Flags & FRAMEWIN_SF_ICON16) ||
+      (pObj->Flags & FRAMEWIN_SF_ICON24) ||
+      (pObj->Flags & FRAMEWIN_SF_ICON32))
+   {
       int x = 0;
       int y = 0;
+      int x1 = 16;
+      int y1 = 16;
       int idx = 0;
       unsigned int v = 0;
+      unsigned int *p = DEF_ICON_16X16;
 
-      for (y = 0; y < 16; y++) {
-        for (x = 0; x < 16; x++) {
-          v = DEF_ICON_16X16[idx++];
+      if (pObj->Flags & FRAMEWIN_SF_ICON24) {
+        x1 = y1 = 24;
+        p = DEF_ICON_24X24;
+      }
+      if (pObj->Flags & FRAMEWIN_SF_ICON32) {
+        x1 = y1 = 32;
+        p = DEF_ICON_32X32;
+      }
+
+
+      for (y = 0; y < y1; y++) {
+        for (x = 0; x < x1; x++) {
+          v = *p++;
           if (v) {
             GUI_SetColor(v);
             GUI_DrawPixel(x + BorderSize + 1, y + BorderSize + 1);
@@ -484,39 +500,6 @@ static void _Paint(FRAMEWIN_Obj* pObj) {
         }
       }
     }
-    if (pObj->Flags & FRAMEWIN_SF_ICON24) {
-      int x = 0;
-      int y = 0;
-      int idx = 0;
-      unsigned int v = 0;
-
-      for (y = 0; y < 24; y++) {
-        for (x = 0; x < 24; x++) {
-          v = DEF_ICON_24X24[idx++];
-          if (v) {
-            GUI_SetColor(v);
-            GUI_DrawPixel(x + BorderSize + 1, y + BorderSize + 1);
-          }
-        }
-      }
-    }
-    if (pObj->Flags & FRAMEWIN_SF_ICON32) {
-      int x = 0;
-      int y = 0;
-      int idx = 0;
-      unsigned int v = 0;
-
-      for (y = 0; y < 32; y++) {
-        for (x = 0; x < 32; x++) {
-          v = DEF_ICON_32X32[idx++];
-          if (v) {
-            GUI_SetColor(v);
-            GUI_DrawPixel(x + BorderSize + 1, y + BorderSize + 1);
-          }
-        }
-      }
-    }
-
   } WM_ITERATE_END();
 
 
