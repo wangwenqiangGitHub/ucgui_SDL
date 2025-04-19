@@ -91,6 +91,7 @@ int GUI__GetLineNumChars(const char GUI_UNI_PTR *s, int MaxNumChars) {
 */
 int GUI__GetLineDistX(const char GUI_UNI_PTR *s, int MaxNumChars) {
   int Dist = 0;
+
   if (s) {
     U16 Char;
     #if GUI_COMPILER_SUPPORTS_FP
@@ -100,6 +101,10 @@ int GUI__GetLineDistX(const char GUI_UNI_PTR *s, int MaxNumChars) {
     #endif
     while (--MaxNumChars >= 0) {
       Char  = GUI_UC__GetCharCodeInc(&s);
+      if (Char == 0) {
+        break;
+      }
+
       Dist += GUI_GetCharDistX(Char);
     }
   }
