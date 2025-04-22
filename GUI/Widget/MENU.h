@@ -52,6 +52,7 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 */
 #define MENU_IF_DISABLED          (1<<0)
 #define MENU_IF_SEPARATOR         (1<<1)
+#define MENU_IF_CHECKED           (1<<2)
 
 /*********************************************************************
 *

@@ -293,6 +293,7 @@ static int _CalcMenuSizeX(MENU_Handle hObj, MENU_Obj* pObj) {
     }
   }
   xSize += (_GetEffectSize(hObj, pObj) << 1);
+  xSize += _CalcTextWidth(pObj, "XX");
   return xSize;
 }
 
@@ -868,10 +869,10 @@ static void _OnPaint(MENU_Handle hObj, MENU_Obj* pObj) {
   GUI__ReduceRect(&FillRect, &FillRect, EffectSize);
   GUI_SetFont(pObj->Props.pFont);
   if (pObj->Flags & MENU_SF_VERTICAL) {
-    int ItemHeight, xSize;
+    int ItemHeight, xSize, charSize = _CalcTextWidth(pObj, "X");
     xSize = _CalcMenuSizeX(hObj, pObj);
     FillRect.x1 = xSize - EffectSize - 1;
-    TextRect.x0 = FillRect.x0 + BorderLeft;
+    TextRect.x0 = FillRect.x0 + BorderLeft + charSize;
     for (i = 0; i < NumItems; i++) {
       pItem = (MENU_ITEM*)GUI_ARRAY_GetpItem(&pObj->ItemArray, i);
       ItemHeight = _GetItemHeight(hObj, pObj, i);
@@ -887,6 +888,10 @@ static void _OnPaint(MENU_Handle hObj, MENU_Obj* pObj) {
         TextRect.y0 = FillRect.y0 + BorderTop;
         TextRect.y1 = TextRect.y0 + FontHeight - 1;
         WIDGET__FillStringInRect(pItem->acText, &FillRect, &TextRect, &TextRect);
+      }
+      if (pItem->Flags & MENU_IF_CHECKED) {
+        GUI_SetColor(GUI_BLACK);
+        GUI_FillCircle((TextRect.x0 - charSize) + 3, TextRect.y0 + ((TextRect.y1 - TextRect.y0) / 2) + 1, 4);
       }
       FillRect.y0 += ItemHeight;
     }
