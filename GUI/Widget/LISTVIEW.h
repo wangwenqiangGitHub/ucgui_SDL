@@ -6,7 +6,7 @@
 *                       (c) Copyright 2002, Micrium Inc., Weston, FL
 *                       (c) Copyright 2002, SEGGER Microcontroller Systeme GmbH
 *
-*              µC/GUI is protected by international copyright laws. Knowledge of the
+*              ?/GUI is protected by international copyright laws. Knowledge of the
 *              source code may not be used to write a similar product. This file may
 *              only be used in accordance with a license and should not be redistributed
 *              in any way. We appreciate your understanding and fairness.
@@ -106,6 +106,14 @@ unsigned         LISTVIEW_SetRowHeight  (LISTVIEW_Handle hObj, unsigned RowHeigh
 void             LISTVIEW_SetSel        (LISTVIEW_Handle hObj, int Sel);
 void             LISTVIEW_SetTextAlign  (LISTVIEW_Handle hObj, unsigned int Index, int Align);
 void             LISTVIEW_SetTextColor  (LISTVIEW_Handle hObj, unsigned int Index, GUI_COLOR Color);
+
+/*********************************************************************
+*
+*       Text handling functions
+*
+**********************************************************************
+*/
+unsigned       LISTVIEW_GetTextLineCount(const char* pText);
 
 /*********************************************************************
 *

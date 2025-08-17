@@ -11,10 +11,11 @@ typedef struct
     const char *value;       // 值
 } ListViewData;
 
+    // { "Temperature Sensor\n(Real-time Monitor)", "25.5°C" },
 // 示例数据 - 包含长描述文本
 ListViewData listData[] = {
     { "Device Status Monitor\n(System Status)", "Normal" },
-    { "Temperature Sensor\n(Real-time Monitor)", "25.5°C" },
+    { "Temperature Sensor", "25.5°C" },
     { "Battery Voltage Monitor\n(Power System)", "3.7V" },
     { "Network Connection Status\n(Network Status)", "Connected" },
     { "System Uptime Statistics\n(Running Time)", "12:34:56" },
@@ -26,7 +27,7 @@ ListViewData listData[] = {
 #define NUM_ROWS (sizeof(listData) / sizeof(listData[0]))
 #define COL_WIDTH_DESC 120
 #define COL_WIDTH_VALUE 80
-#define ROW_HEIGHT 40 // 增加行高以容纳换行文本
+// #define ROW_HEIGHT 40 // 增加行高以容纳换行文本
 
 void handle_sigint(int sig)
 {
@@ -74,7 +75,7 @@ int main(void)
     }
 
     // 设置行高
-    LISTVIEW_SetRowHeight(hList, ROW_HEIGHT);
+    // LISTVIEW_SetRowHeight(hList, ROW_HEIGHT);
 
     // 创建按钮
     BUTTON_Handle hButton = BUTTON_Create(260, 5, 50, 25,

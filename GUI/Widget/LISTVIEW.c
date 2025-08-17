@@ -6,7 +6,7 @@
 *                       (c) Copyright 2002, Micrium Inc., Weston, FL
 *                       (c) Copyright 2002, SEGGER Microcontroller Systeme GmbH
 *
-*              µC/GUI is protected by international copyright laws. Knowledge of the
+*              ?/GUI is protected by international copyright laws. Knowledge of the
 *              source code may not be used to write a similar product. This file may
 *              only be used in accordance with a license and should not be redistributed
 *              in any way. We appreciate your understanding and fairness.
@@ -101,19 +101,82 @@ LISTVIEW_PROPS LISTVIEW_DefaultProps = {
 */
 /*********************************************************************
 *
-*       LISTVIEW__GetRowDistY
-*/
-unsigned LISTVIEW__GetRowDistY(const LISTVIEW_Obj* pObj) {
+*       LISTVIEW__GetRowDistYEx
+*
+* Purpose:                                                           
+*   Calculate the row height based on font and text lines            
+*
+* Parameters:                                                        
+*   pObj   - Pointer to LISTVIEW object                              
+*   pText  - Pointer to the text string (optional)                   
+*
+* Return value:                                                      
+*   Row height in pixels                                             
+*********************************************************************/
+unsigned LISTVIEW__GetRowDistYEx(const LISTVIEW_Obj* pObj, const char* pText) {
   unsigned RowDistY;
+  int lineCount = 1;
+
+  // Calculate line count if text is provided
+  if (pText) {
+    lineCount = LISTVIEW_GetTextLineCount(pText);
+  }
+
   if (pObj->RowDistY) {
-    RowDistY = pObj->RowDistY;
+    RowDistY = pObj->RowDistY * lineCount;
   } else {
-    RowDistY = GUI_GetYDistOfFont(pObj->Props.pFont);
+    RowDistY = GUI_GetYDistOfFont(pObj->Props.pFont) * lineCount;
     if (pObj->ShowGrid) {
-      RowDistY++;
+      RowDistY += lineCount;  // Add grid line height for each line
     }
   }
   return RowDistY;
+}
+
+/*********************************************************************
+*
+*       LISTVIEW__GetRowDistY
+*
+* Purpose:                                                           
+*   Calculate the default row height based on font                   
+*
+* Parameters:                                                        
+*   pObj - Pointer to LISTVIEW object                                
+*
+* Return value:                                                      
+*   Row height in pixels                                             
+*********************************************************************/
+unsigned LISTVIEW__GetRowDistY(const LISTVIEW_Obj* pObj) {
+  return LISTVIEW__GetRowDistYEx(pObj, NULL);
+}
+
+/*********************************************************************
+*                                                                     *
+*       LISTVIEW_GetTextLineCount                                     *
+*                                                                     *
+* Purpose:                                                           *
+*   Calculate the number of lines in a text string based on '\n'      *
+*                                                                     *
+* Parameters:                                                         *
+*   pText - Pointer to the text string                                *
+*                                                                     *
+* Return value:                                                       *
+*   Number of lines                                                   *
+**********************************************************************/
+unsigned LISTVIEW_GetTextLineCount(const char* pText) {
+  if (!pText) return 1;
+
+  unsigned lineCount = 1;
+  const char* p = pText;
+
+  while (*p) {
+    if (*p == '\n') {
+      lineCount++;
+    }
+    p++;
+  }
+
+  return lineCount;
 }
 
 /*********************************************************************
@@ -127,18 +190,35 @@ unsigned LISTVIEW__GetRowDistY(const LISTVIEW_Obj* pObj) {
 * Return value:
 *   Number of visible rows. If no entire row can be displayed, this
 *   function will return one.
+*
+* Note: This is a simplified calculation that uses the average row height.
+*       The actual visible rows may vary due to dynamic row heights.
 */
 static unsigned _GetNumVisibleRows(LISTVIEW_Handle hObj, const LISTVIEW_Obj* pObj) {
-  unsigned RowDistY, ySize, r = 1;
+  unsigned AvgRowDistY, ySize, r = 1;
   GUI_RECT Rect;
   WM_GetInsideRectExScrollbar(hObj, &Rect);
   ySize    = Rect.y1 - Rect.y0 + 1 - HEADER_GetHeight(pObj->hHeader);
-  RowDistY = LISTVIEW__GetRowDistY(pObj);
-  if (RowDistY) {
-    r = ySize / RowDistY;
+  AvgRowDistY = LISTVIEW__GetRowDistY(pObj); // Get average row height
+  if (AvgRowDistY) {
+    r = ySize / AvgRowDistY;
     r = (r == 0) ? 1 : r;
   }
   return r;
+}
+
+/*********************************************************************
+*
+*       LISTVIEW__UpdateVisibleRows
+*
+* Purpose:
+*   Updates the visible rows based on dynamic row heights.
+*   This function should be called after adding or modifying rows.
+*/
+void LISTVIEW__UpdateVisibleRows(LISTVIEW_Handle hObj) {
+  LISTVIEW_Obj* pObj = LISTVIEW_H2P(hObj);
+  LISTVIEW__UpdateScrollParas(hObj, pObj);
+  WM_InvalidateWindow(hObj);
 }
 
 /*********************************************************************
@@ -156,7 +236,6 @@ static void _Paint(LISTVIEW_Handle hObj, LISTVIEW_Obj* pObj, WM_MESSAGE* pMsg) {
   NumColumns = HEADER_GetNumItems(pObj->hHeader);
   NumRows    = GUI_ARRAY_GetNumItems(&pObj->RowArray);
   NumVisRows = _GetNumVisibleRows(hObj, pObj);
-  RowDistY   = LISTVIEW__GetRowDistY(pObj);
   LBorder    = pObj->LBorder;
   RBorder    = pObj->RBorder;
   EffectSize = pObj->Widget.pEffect->EffectSize;
@@ -175,6 +254,11 @@ static void _Paint(LISTVIEW_Handle hObj, LISTVIEW_Obj* pObj, WM_MESSAGE* pMsg) {
   for (i = pObj->ScrollStateV.v; i < EndRow; i++) {
     pRow = (const GUI_ARRAY*)GUI_ARRAY_GetpItem(&pObj->RowArray, i);
     if (pRow) {
+      // Get the text of the first column to determine row height
+      LISTVIEW_ITEM * pFirstItem = (LISTVIEW_ITEM *)GUI_ARRAY_GetpItem(pRow, 0);
+      const char* pText = pFirstItem->acText;
+      RowDistY = LISTVIEW__GetRowDistYEx(pObj, pText);
+
       Rect.y0 = yPos;
       /* Break when all other rows are outside the drawing area */
       if (Rect.y0 > ClipRect.y1) {
@@ -246,15 +330,23 @@ static void _Paint(LISTVIEW_Handle hObj, LISTVIEW_Obj* pObj, WM_MESSAGE* pMsg) {
   if (pObj->ShowGrid) {
     LCD_SetColor(pObj->Props.GridColor);
     yPos = HEADER_GetHeight(pObj->hHeader) + EffectSize - 1;
-    for (i = 0; i < NumVisRows; i++) {
-      yPos += RowDistY;
-      /* Break when all other rows are outside the drawing area */
-      if (yPos > ClipRect.y1) {
-        break;
-      }
-      /* Make sure that we draw only when row is in drawing area */
-      if (yPos >= ClipRect.y0) {
-        GUI_DrawHLine(yPos, ClipRect.x0, ClipRect.x1);
+    for (i = pObj->ScrollStateV.v; i < EndRow; i++) {
+      pRow = (const GUI_ARRAY*)GUI_ARRAY_GetpItem(&pObj->RowArray, i);
+      if (pRow) {
+        // Get the text of the first column to determine row height
+        LISTVIEW_ITEM * pFirstItem = (LISTVIEW_ITEM *)GUI_ARRAY_GetpItem(pRow, 0);
+        const char* pText = pFirstItem->acText;
+        RowDistY = LISTVIEW__GetRowDistYEx(pObj, pText);
+        yPos += RowDistY;
+
+        /* Break when all other rows are outside the drawing area */
+        if (yPos > ClipRect.y1) {
+          break;
+        }
+        /* Make sure that we draw only when row is in drawing area */
+        if (yPos >= ClipRect.y0) {
+          GUI_DrawHLine(yPos, ClipRect.x0, ClipRect.x1);
+        }
       }
     }
     xPos = EffectSize - pObj->ScrollStateH.v;
@@ -614,6 +706,7 @@ LISTVIEW_Handle LISTVIEW_CreateEx(int x0, int y0, int xsize, int ysize, WM_HWIN 
     pObj->RBorder   = 1;
     pObj->hHeader   = HEADER_CreateEx(0, 0, 0, 0, hObj, WM_CF_SHOW, 0, 0);
     LISTVIEW__UpdateScrollParas(hObj, pObj);
+    LISTVIEW__UpdateVisibleRows(hObj);
     WM_UNLOCK();
   } else {
     GUI_DEBUG_ERROROUT_IF(hObj==0, "LISTVIEW_Create failed")
@@ -709,6 +802,7 @@ void LISTVIEW_AddRow(LISTVIEW_Handle hObj, const GUI_ConstString* ppText) {
         }
       }
       LISTVIEW__UpdateScrollParas(hObj, pObj);
+      LISTVIEW__UpdateVisibleRows(hObj);
       LISTVIEW__InvalidateRow(hObj, pObj, NumRows);
     }
     WM_UNLOCK();

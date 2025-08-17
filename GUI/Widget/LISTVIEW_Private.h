@@ -6,7 +6,7 @@
 *                       (c) Copyright 2002, Micrium Inc., Weston, FL
 *                       (c) Copyright 2002, SEGGER Microcontroller Systeme GmbH
 *
-*              µC/GUI is protected by international copyright laws. Knowledge of the
+*              ?/GUI is protected by international copyright laws. Knowledge of the
 *              source code may not be used to write a similar product. This file may
 *              only be used in accordance with a license and should not be redistributed
 *              in any way. We appreciate your understanding and fairness.
@@ -108,8 +108,10 @@ extern LISTVIEW_PROPS LISTVIEW_DefaultProps;
 int      LISTVIEW__UpdateScrollParas   (LISTVIEW_Handle hObj, LISTVIEW_Obj* pObj);
 void     LISTVIEW__InvalidateInsideArea(LISTVIEW_Handle hObj, LISTVIEW_Obj* pObj);
 unsigned LISTVIEW__GetRowDistY         (const LISTVIEW_Obj* pObj);
+unsigned LISTVIEW__GetRowDistYEx       (const LISTVIEW_Obj* pObj, const char* pText);
 void     LISTVIEW__InvalidateRow       (LISTVIEW_Handle hObj, LISTVIEW_Obj* pObj, int Sel);
 int      LISTVIEW__UpdateScrollPos     (LISTVIEW_Handle hObj, LISTVIEW_Obj* pObj);
+void     LISTVIEW__UpdateVisibleRows   (LISTVIEW_Handle hObj);
 
 #endif /* GUI_WINSUPPORT */
 
