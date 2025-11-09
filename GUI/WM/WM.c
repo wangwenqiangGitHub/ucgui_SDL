@@ -352,6 +352,30 @@ void  WM__ActivateClipRect(void) {
 *   a particular parent window.
 *   The window is placed on top of all siblings with the same level.
 */
+// 新建窗口添加到父窗口的同胞窗口管理链表中。这个窗口管理链表是建立在uCGUI的动态内存中，利用WM_obj类型中的成员hFirstChild和hNext连接成一个单向链表。
+// 如果父窗口没有孩子，直接将其作为父窗口的孩子即可。
+// 插入之前： 父窗口--->0  ====>
+// 插入之后： 父窗口--->当前窗口--->0
+
+// 如果父窗口有孩子，第一个孩子有“在顶层”的标志，而当前创建的窗口没有这个标志，则将其作为其父窗口的第一个孩子。
+// 插入之前：父窗口--->长兄--->~~~--->0 =>
+// 插入之后：父窗口--->当前窗口--->长兄--->~~~--->0
+
+// 如果父窗口有孩子，第一个孩子没有“在顶层”的标志，而当前创建的窗口也没有这个标志，则将其放在同胞链表中有“在顶层”标志窗口的前边，也就是所有没有“在顶层”标志窗口的后边。
+// 插入之前：
+// 　　父窗口--->长兄（没标志）--->次兄（没标志）--->三兄（有标志）--->~~~--->0 =>
+// 插入之后：
+// 　　父窗口--->长兄（没标志）--->次兄（没标志）--->当前窗口--->三兄（有标志）--->~~~--->0
+
+// 如果父窗口有孩子，第一个孩子没有“在顶层”的标志，而当前创建的窗口有这个标志，则将其放在同胞链表的最后边。
+// 插入之前：
+// 　　父窗口--->长兄（没标志）--->次兄（没标志）--->三兄（有标志）--->~~~--->0 =>
+// 插入之后：
+// 　　父窗口--->长兄（没标志）--->次兄（没标志）--->三兄（有标志）--->~~~--->当前窗口--->0
+
+// 窗口顺序排列分析
+// 1、按照窗口分层的概念来说，链表的头部窗口是显示在最底层，链表的尾部窗口是显示在最顶层。在进行窗口重绘的时候，正是从链表的头部开始依次往尾部进行重绘。
+// 2、子窗口相对于父窗口来说，子窗口在父窗口的顶部。
 void WM__InsertWindowIntoList(WM_HWIN hWin, WM_HWIN hParent) {
   int OnTop;
   WM_HWIN hi;
@@ -359,37 +383,45 @@ void WM__InsertWindowIntoList(WM_HWIN hWin, WM_HWIN hParent) {
   WM_Obj * pParent;
   WM_Obj * pi;
 
-  if (hParent) {
-    pWin = WM_H2P(hWin);
-    pWin->hNext = 0;
-    pWin->hParent = hParent;
-    pParent = WM_H2P(hParent);
-    OnTop   = pWin->Status & WM_CF_STAYONTOP;
-    hi = pParent->hFirstChild;
+  if (hParent) { //桌面窗口是不存在父窗口的
+    pWin = WM_H2P(hWin); // 获取当前窗口的动态内存地址
+    pWin->hNext = 0; // 他的下一个兄弟窗口为0
+    pWin->hParent = hParent; // 记录他的父窗口
+    pParent = WM_H2P(hParent); // 获取父窗口的动态内存地址
+    OnTop   = pWin->Status & WM_CF_STAYONTOP; // 可以用来判断此窗口是否有在最顶层的标志
+    hi = pParent->hFirstChild; // 父窗口的第一个子窗口
     /* Put it at beginning of the list if there is no child */
     if (hi == 0) {   /* No child yet ... Makes things easy ! */
-      pParent->hFirstChild = hWin;
-      return;                         /* Early out ... We are done */
+                     // 父窗口----> 0
+                     // 父窗口----> 当前窗口 ----> 0
+        pParent->hFirstChild = hWin;  //没有子窗口，就把它作为父窗口的第一个子窗口
+        return; /* Early out ... We are done */
     }
     /* Put it at beginning of the list if first child is a TOP window and new one is not */
-    pi = WM_H2P(hi);
-    if (!OnTop) {
-      if (pi->Status & WM_SF_STAYONTOP) {
-        pWin->hNext = hi;
-        pParent->hFirstChild = hWin;
-        return;                         /* Early out ... We are done */
+    pi = WM_H2P(hi); //获取父窗口第一个子窗口的动态内存地址
+    if (!OnTop) { //如果此窗口没有在最顶层的标志
+      if (pi->Status & WM_SF_STAYONTOP) { //判断长兄是否有在最顶层的标志
+		  /*
+		   *    父窗口--->长兄--->~~~--->0 =>
+		   *    父窗口--->当前窗口--->长兄--->~~~--->0
+		   */
+          pWin->hNext = hi;               //当前窗口的下一个窗口指向其长兄
+          pParent->hFirstChild = hWin;    //父窗口的第一个子窗口为当前窗口
+          return;                         /* Early out ... We are done */
       }
     }
     /* Put it at the end of the list or before the last non "STAY-ON-TOP" child */
+	   /* 把它放在链表的最顶端或者在第一个“最顶层”窗口之前 */
     do {
       WM_Obj* pNext;
       WM_HWIN hNext;
       if ((hNext = pi->hNext) == 0) {   /* End of sibling list ? */
+		// /* 放在链表的最顶端 */
         pi->hNext = hWin;             /* Then modify this last element to point to new one and we are done */
         break;
       }
       pNext = WM_H2P(hNext);
-      if (!OnTop) {
+      if (!OnTop) { //如果当前窗口没有“在最顶层”的标志
         if (pNext->Status & WM_SF_STAYONTOP) {
           pi->hNext = hWin;
           pWin->hNext = hNext;
@@ -530,16 +562,22 @@ void WM__RemoveFromLinList(WM_HWIN hWin) {
 *
 *       _AddToLinList
 */
+// 将新建窗口添加到窗口管理链表中.这个窗口管理链表是建立在UCGUI的动态内存中.利用WM_obj类型中的成员hNextLin连接成一个单向链表.
+// 链表的构建过程如下:
+// 插入之前: 桌面窗口--->最近创建的窗口1--->更早创建的窗口2 ...  0
+// 插入之后: 桌面窗口--->当前要插入的窗口--->最近创建的窗口1--->更早创建的窗口2 ... 0
 static void _AddToLinList(WM_HWIN hNew) {
   WM_Obj* pFirst;
   WM_Obj* pNew;
-  if (WM__FirstWin) {
-    pFirst = WM_H2P(WM__FirstWin);
-    pNew   = WM_H2P(hNew);
+  if (WM__FirstWin) { // 如果不是桌面窗口(事实上桌面窗口肯定存在了)
+    pFirst = WM_H2P(WM__FirstWin); // 首先获取桌面窗口的动态内存
+    pNew   = WM_H2P(hNew); // 获取要插入窗口的动态内存地址
+// 插入之前: 桌面窗口--->最近创建的窗口1--->更早创建的窗口2
+// 插入之后: 桌面窗口--->当前要插入的窗口--->最近创建的窗口1--->更早创建的窗口2
     pNew->hNextLin = pFirst->hNextLin;
     pFirst->hNextLin = hNew;
   } else {
-    WM__FirstWin = hNew;
+    WM__FirstWin = hNew; // 创建桌面窗口时，将桌面窗口的句柄赋给此变量
   }
 }
 
@@ -803,19 +841,24 @@ void WM_InvalidateArea(const GUI_RECT* pRect) {
 *
 *       WM_CreateWindowAsChild
 */
+// 根据父窗口的坐标计算当前窗口的坐标,高度和宽度.从动态内存区中开辟出一块窗口管理区域，
+// 然后向其中填写入当前窗口的参数值。比较重要的是接下来的两步骤:
+// 1. 将当前窗口插入到窗口管理链表当中以及窗口插入到其父窗口的同胞链表当中。
+// 2. 如果创建的时候以显示模式WM_CF_SHOW创建,那么要为此窗口加入了可视标志WM_SF_ISVIS, 而且还要设置窗口为无效。
+//    这样在执行GUI_Exec()或者WM_Exec()的时候就会对该窗口重绘
 WM_HWIN WM_CreateWindowAsChild( int x0, int y0, int width, int height
                                ,WM_HWIN hParent, U16 Style, WM_CALLBACK* cb
                                ,int NumExtraBytes) {
   WM_Obj* pWin;
   WM_HWIN hWin;
-  WM_ASSERT_NOT_IN_PAINT();
+  WM_ASSERT_NOT_IN_PAINT(); //断言 这里没有使用
   WM_LOCK();
-  Style |= WM__CreateFlags;
+  Style |= WM__CreateFlags; // 给窗口的标识增加一个创建标志
   /* Default parent is Desktop 0 */
-  if (!hParent) {
-    if (WM__NumWindows) {
+  if (!hParent) { //如果不存在父窗口, 比如说是桌面窗口
+    if (WM__NumWindows) { //创建桌面窗口，这个不会执行的
     #if GUI_NUM_LAYERS == 1
-      hParent = WM__ahDesktopWin[0];
+      hParent = WM__ahDesktopWin[0]; // 如果用户没有指定当前创建窗口的父窗口，而且该窗口又不是桌面窗口，默认的将桌面窗口作为其父窗口
     #else
       hParent = WM__ahDesktopWin[GUI_Context.SelLayer];
     #endif
@@ -837,9 +880,11 @@ WM_HWIN WM_CreateWindowAsChild( int x0, int y0, int width, int height
   }
   if ((hWin = (WM_HWIN) GUI_ALLOC_AllocZero(NumExtraBytes + sizeof(WM_Obj))) == 0) {
     GUI_DEBUG_ERROROUT("WM_CreateWindow: No memory to create window");
-  } else {
-    WM__NumWindows++;
-    pWin = WM_H2P(hWin);
+	// 如果没有空间创建需要的动态内存块
+  } else {  // 申请动态内存成功
+    WM__NumWindows++; // 保存系统总窗口数目的计数器加1
+    pWin = WM_H2P(hWin); // 计算获取动态内存数据区的地址
+    /* 向动态内存区写入当前窗口的参数*/
     pWin->Rect.x0 = x0;
     pWin->Rect.y0 = y0;
     pWin->Rect.x1 = x0 + width - 1;
@@ -858,26 +903,27 @@ WM_HWIN WM_CreateWindowAsChild( int x0, int y0, int width, int height
                               WM_CF_ANCHOR_TOP |
                               WM_CF_LATE_CLIP));
     /* Add to linked lists */
-    _AddToLinList(hWin);
-    WM__InsertWindowIntoList(hWin, hParent);
+    _AddToLinList(hWin);                     // 将窗口插入到窗口管理链表当中
+    WM__InsertWindowIntoList(hWin, hParent); //插入到父窗口管理链表当中
+    // 根据用户定义的窗口风格进行一些列的操作
     /* Activate window if WM_CF_ACTIVATE is specified */
-    if (Style & WM_CF_ACTIVATE) {
+    if (Style & WM_CF_ACTIVATE) {  //如果带激活标志的话，就激活窗口
       WM_SelectWindow(hWin);  /* This is not needed if callbacks are being used, but it does not cost a lot and makes life easier ... */
     }
     /* Handle the Style flags, one at a time */
     #if WM_SUPPORT_TRANSPARENCY
-      if (Style & WM_SF_HASTRANS) {
+      if (Style & WM_SF_HASTRANS) {  //透明窗口
         WM__TransWindowCnt++;          /* Increment counter for transparency windows */
       }
     #endif
     if (Style & WM_CF_BGND) {
       WM_BringToBottom(hWin);
     }
-    if (Style & WM_CF_SHOW) {
-      pWin->Status |= WM_SF_ISVIS;  /* Set Visibility flag */
-      WM_InvalidateWindow(hWin);    /* Mark content as invalid */
+    if (Style & WM_CF_SHOW) { // 显示窗口
+      pWin->Status |= WM_SF_ISVIS;  /* Set Visibility flag */ // 设置可视状态位
+      WM_InvalidateWindow(hWin);    /* Mark content as invalid */ // 如果有显示命令, 还会设置窗口为无效，等待重绘
     }
-    WM__SendMsgNoData(hWin, WM_CREATE);
+    WM__SendMsgNoData(hWin, WM_CREATE); // 发一个创建消息, 这样创建的时候就可以在回调函数中进行处理
   }
   WM_UNLOCK();
   return hWin;

@@ -284,15 +284,16 @@ typedef struct {
 
 typedef void WM_CALLBACK( WM_MESSAGE* pMsg);
 
-typedef struct {
-  GUI_RECT Rect;        /* outer dimensions of window */
-  GUI_RECT InvalidRect; /* invalid rectangle */
-  WM_CALLBACK* cb;      /* ptr to notification callback */
-  WM_HWIN hNextLin;     /* Next window in linear list */
-  WM_HWIN hParent;
-  WM_HWIN hFirstChild;
-  WM_HWIN hNext;
-  U16 Status;	          /* Some status flags */
+typedef struct
+{
+    GUI_RECT Rect; /* outer dimensions of window */     // 窗口尺寸(x0, y0, x1, y1) 8字节
+    GUI_RECT InvalidRect; /* invalid rectangle */       //无效区域(x0, y0, x1, y1) 8字节
+    WM_CALLBACK *cb; /* ptr to notification callback */ // 回调函数 4字节
+    WM_HWIN hNextLin; /* Next window in linear list */  // 指向链表
+    WM_HWIN hParent;                                    // 当前窗口的父窗口
+    WM_HWIN hFirstChild;                                // 当前窗口的第一个子窗口 2字节
+    WM_HWIN hNext;                                      // 下一个兄弟窗口 2字节
+    U16 Status; /* Some status flags */                 // 标志位 2字节
 } WM_Obj;
 
 typedef void WM_tfPollPID(void);

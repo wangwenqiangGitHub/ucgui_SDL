@@ -107,12 +107,13 @@ typedef struct {
 *
 *       menu item data
 */
-typedef struct {
- // const char* pText;
-  char* pText;
-  U16         Id;
-  U16         Flags;
-  MENU_Handle hSubmenu;
+typedef struct
+{
+    // const char* pText;
+    char *pText;          // 菜单项文本
+    U16 Id;               // 菜单项的ID
+    U16 Flags;            // MENU_IF_DISABLED 菜单项已被禁用; MENU_IF_SEPARATOR 菜单项为分隔符
+    MENU_Handle hSubmenu; // 如果该菜单项代表一个子菜单，则此元素包含子菜单的句柄
 } MENU_ITEM_DATA;
 
 /*********************************************************************

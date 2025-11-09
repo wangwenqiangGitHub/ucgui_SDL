@@ -61,6 +61,12 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #define WM_SF_CONST_OUTLINE     WM_CF_CONST_OUTLINE       /* Constant outline.*/
 
 #define WM_HANDLE2PTR(hWin) ((WM_Obj*)GUI_ALLOC_h2p(hWin))    /* older form ... to be eliminated */
+
+// H代表Handle(句柄)
+// P代表Pointer(指针)
+// 设计思考 封装性: 句柄 给应用程序使用的抽象标识 指针 给内部数据结构的具体地址
+// ucgui使用一个动态内存分配系统（通常是一个自定义的堆管理）来分配窗口对象（WM_Obj）和其他图形对象。
+// 每个窗口对象在内存中都有一个唯一的地址，但是直接暴露内存地址给应用程序是不安全的，因此使用句柄来间接引用。
 #define WM_H2P(hWin)        ((WM_Obj*)GUI_ALLOC_h2p(hWin))
 
 
